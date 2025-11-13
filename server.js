@@ -1,11 +1,21 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const OpenAI = require('openai');
 const app = express();
 const PORT = 3000;
 
-// OpenAI API Configuration
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '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';
+// OpenAI API Configuration - get from environment variable
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+if (!OPENAI_API_KEY) {
+    console.error('❌ ERROR: OPENAI_API_KEY environment variable is not set!');
+    console.error('Please create a .env file with your OpenAI API key.');
+    console.error('See .env.example for reference.');
+    process.exit(1);
+}
 
 const openai = new OpenAI({
     apiKey: OPENAI_API_KEY

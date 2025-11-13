@@ -41,14 +41,25 @@ Calorie-Tracker/
 npm install
 ```
 
-2. Start the backend server:
+2. Set up environment variables:
+   - A `.env` file has been created with your OpenAI API key
+   - The `.env` file is already in `.gitignore` to keep your API key secret
+   - If you need to set it up manually, copy `.env.example` to `.env` and add your API key:
+   ```bash
+   cp .env.example .env
+   # Then edit .env and add your OpenAI API key
+   ```
+
+3. Start the backend server:
 ```bash
 npm start
 ```
 
 The server will start on `http://localhost:3000`
 
-3. Open the application:
+**Note:** The server will exit with an error if the `OPENAI_API_KEY` environment variable is not set.
+
+4. Open the application:
    - Open `login.html` in your web browser (this is the entry point), or
    - Use a local server like Live Server in VS Code, or
    - Run `python -m http.server 8000` and visit `http://localhost:8000/login.html`
@@ -85,9 +96,13 @@ The application uses OpenAI's GPT-3.5-turbo model to intelligently analyze meal 
 
 ## API Configuration
 
-The OpenAI API key is configured in `server.js`. For production use, it's recommended to:
-- Store the API key in an environment variable: `OPENAI_API_KEY`
-- The server will automatically use the environment variable if available
+The OpenAI API key is stored securely in a `.env` file (which is gitignored):
+- The API key is loaded from the `OPENAI_API_KEY` environment variable
+- The `.env` file contains your API key and is not committed to version control
+- A `.env.example` file is provided as a template for other developers
+- The server will exit with an error if the API key is not found
+
+**Security Note:** Never commit your `.env` file to version control. It's already in `.gitignore`.
 
 ## Future Enhancements
 
