@@ -53,14 +53,16 @@
 4. **Add Environment Variables:**
    Click "Advanced" → "Add Environment Variable"
    
-   Add these three variables:
+   Add these three variables (use values from your local `.env` file):
    ```
-   OPENAI_API_KEY=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
+   OPENAI_API_KEY=<your-openai-api-key>
    
-   SUPABASE_URL=https://veqovsopisdiezldnljv.supabase.co
+   SUPABASE_URL=<your-supabase-project-url>
    
-   SUPABASE_SECRET_KEY=sb_secret_fDRofOUWKmOsgg8UB539dw_3DOuw-32
+   SUPABASE_SECRET_KEY=<your-supabase-secret-key>
    ```
+   
+   **Note:** Copy these values from your local `.env` file. Never commit actual API keys to GitHub!
 
 5. **Deploy:**
    - Click "Create Web Service"
@@ -82,7 +84,10 @@
 
 3. **Add Environment Variables:**
    - Go to "Variables" tab
-   - Add: `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`
+   - Add these variables (use values from your local `.env` file):
+     - `OPENAI_API_KEY` - Your OpenAI API key
+     - `SUPABASE_URL` - Your Supabase project URL
+     - `SUPABASE_SECRET_KEY` - Your Supabase secret key
 
 4. **Deploy:**
    - Railway will auto-detect Node.js and deploy
@@ -105,7 +110,10 @@
 
 3. **Add Environment Variables:**
    - Go to Vercel dashboard → Your project → Settings → Environment Variables
-   - Add all three env variables
+   - Add all three env variables from your local `.env` file:
+     - `OPENAI_API_KEY`
+     - `SUPABASE_URL`
+     - `SUPABASE_SECRET_KEY`
 
 4. **Redeploy:**
    ```bash
