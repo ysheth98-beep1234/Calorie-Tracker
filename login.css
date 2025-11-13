@@ -58,6 +58,39 @@ body {
     font-size: 1rem;
 }
 
+.auth-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    background: #f8f9fa;
+    padding: 5px;
+    border-radius: 12px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
 .login-form {
     display: flex;
     flex-direction: column;
@@ -140,6 +173,18 @@ body {
     font-size: 0.9rem;
     text-align: center;
     animation: shake 0.3s ease;
+}
+
+.success-message {
+    margin-top: 15px;
+    padding: 12px 15px;
+    background: #efe;
+    border: 1px solid #cfc;
+    border-radius: 8px;
+    color: #3c3;
+    font-size: 0.9rem;
+    text-align: center;
+    animation: slideUp 0.3s ease;
 }
 
 @keyframes shake {

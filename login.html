@@ -11,10 +11,19 @@
         <div class="login-card">
             <div class="login-header">
                 <h1>🍽️ Calorie Tracker</h1>
-                <p class="login-subtitle">Please enter your User ID to continue</p>
+                <p class="login-subtitle">Welcome! Please register or login to continue</p>
             </div>
             
-            <form id="loginForm" class="login-form">
+            <div class="auth-tabs">
+                <button class="tab-btn active" id="registerTab" data-mode="register">
+                    Register
+                </button>
+                <button class="tab-btn" id="loginTab" data-mode="login">
+                    Login
+                </button>
+            </div>
+            
+            <form id="authForm" class="login-form">
                 <div class="input-group">
                     <label for="userId">User ID</label>
                     <input 
@@ -28,8 +37,8 @@
                     >
                 </div>
                 
-                <button type="submit" class="login-btn" id="loginBtn">
-                    <span>Sign In</span>
+                <button type="submit" class="login-btn" id="submitBtn">
+                    <span id="submitBtnText">Register</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M5 12h14M12 5l7 7-7 7"/>
                     </svg>
@@ -37,6 +46,7 @@
             </form>
             
             <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
         </div>
     </div>
 
