@@ -55,6 +55,9 @@ console.log(`   URL: ${SUPABASE_URL.substring(0, 30)}...`);
 app.use(cors());
 app.use(express.json());
 
+// Serve static files (frontend)
+app.use(express.static(__dirname));
+
 // Estimate calories using OpenAI API
 async function estimateCaloriesWithAI(mealText, mealType) {
     try {
@@ -530,9 +533,15 @@ app.get('/health', async (req, res) => {
     }
 });
 
+// Serve frontend
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/login.html');
+});
+
 // Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Calorie Tracker API server running on http://localhost:${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
+const port = process.env.PORT || PORT;
+app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Calorie Tracker API server running on port ${port}`);
+    console.log(`📊 Health check: http://localhost:${port}/health`);
 });
 

@@ -95,7 +95,7 @@ authForm.addEventListener('submit', async (e) => {
 
 // Handle registration
 async function handleRegister(userId) {
-    const response = await fetch('http://localhost:3000/api/register', {
+        const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ async function handleRegister(userId) {
 
 // Handle login
 async function handleLogin(userId) {
-    const response = await fetch('http://localhost:3000/api/login', {
+        const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

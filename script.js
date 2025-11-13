@@ -64,7 +64,7 @@ async function loadDataFromDatabase() {
     
     try {
         // Fetch daily totals for last 7 days
-        const response = await fetch('http://localhost:3000/api/get-daily-totals', {
+        const response = await fetch('/api/get-daily-totals', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ async function loadDataFromDatabase() {
 // Save meal to database
 async function saveMealToDatabase(userId, meal, mealType, calories) {
     try {
-        const response = await fetch('http://localhost:3000/api/save-meal', {
+        const response = await fetch('/api/save-meal', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -278,7 +278,7 @@ function initializeApp() {
 
         try {
             // Send to backend API
-            const response = await fetch('http://localhost:3000/api/estimate-calories', {
+            const response = await fetch('/api/estimate-calories', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
