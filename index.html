@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>🍽️ Calorie Tracker</h1>
+                    <p class="subtitle">Track your meals and get instant calorie estimates</p>
+                </div>
+                <div class="user-info">
+                    <span class="user-id" id="displayUserId"></span>
+                    <button class="logout-btn" id="logoutBtn" title="Logout">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <p>👋 Welcome! Tell me what you ate for breakfast, lunch, or dinner, and I'll estimate the calories for you.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="meal-type-selector">
+                    <button class="meal-btn active" data-meal="breakfast">🌅 Breakfast</button>
+                    <button class="meal-btn" data-meal="lunch">☀️ Lunch</button>
+                    <button class="meal-btn" data-meal="dinner">🌙 Dinner</button>
+                </div>
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="mealInput" 
+                        placeholder="E.g., 2 eggs, toast with butter, orange juice..."
+                        autocomplete="off"
+                    >
+                    <button id="sendBtn" class="send-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-label">Today's Total</div>
+                <div class="stat-value" id="totalCalories">0</div>
+                <div class="stat-unit">calories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Breakfast</div>
+                <div class="stat-value" id="breakfastCalories">0</div>
+                <div class="stat-unit">calories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Lunch</div>
+                <div class="stat-value" id="lunchCalories">0</div>
+                <div class="stat-unit">calories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Dinner</div>
+                <div class="stat-value" id="dinnerCalories">0</div>
+                <div class="stat-unit">calories</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
