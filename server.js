@@ -336,6 +336,179 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// API endpoint to save meal data to Output table
+app.post('/api/save-meal', async (req, res) => {
+    try {
+        const { userId, meal, mealType, calories } = req.body;
+        
+        if (!userId || !meal || !mealType || calories === undefined) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields: userId, meal, mealType, calories'
+            });
+        }
+        
+        // Insert into Output table
+        const { data, error } = await supabase
+            .from('Output')
+            .insert([
+                {
+                    userid: userId,
+                    'Meal': meal,
+                    'Type of Meal': mealType,
+                    'Calories': calories
+                }
+            ])
+            .select();
+        
+        if (error) {
+            console.error('Error saving meal to database:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to save meal to database',
+                details: error.message
+            });
+        }
+        
+        console.log(`✅ Meal saved for user ${userId}: ${meal} (${calories} kcal)`);
+        
+        return res.json({
+            success: true,
+            message: 'Meal saved successfully',
+            data: data
+        });
+        
+    } catch (error) {
+        console.error('Error in save-meal endpoint:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to save meal'
+        });
+    }
+});
+
+// API endpoint to get user's meal history
+app.post('/api/get-meals', async (req, res) => {
+    try {
+        const { userId, startDate, endDate } = req.body;
+        
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                error: 'userId is required'
+            });
+        }
+        
+        let query = supabase
+            .from('Output')
+            .select('*')
+            .eq('userid', userId)
+            .order('created_at', { ascending: false });
+        
+        // If date range provided, filter by dates
+        if (startDate) {
+            query = query.gte('created_at', startDate);
+        }
+        if (endDate) {
+            query = query.lte('created_at', endDate);
+        }
+        
+        const { data, error } = await query;
+        
+        if (error) {
+            console.error('Error fetching meals:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to fetch meals from database',
+                details: error.message
+            });
+        }
+        
+        return res.json({
+            success: true,
+            meals: data || []
+        });
+        
+    } catch (error) {
+        console.error('Error in get-meals endpoint:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to fetch meals'
+        });
+    }
+});
+
+// API endpoint to get daily calorie totals for last 7 days
+app.post('/api/get-daily-totals', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                error: 'userId is required'
+            });
+        }
+        
+        // Get data from last 7 days
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const startDate = sevenDaysAgo.toISOString();
+        
+        const { data, error } = await supabase
+            .from('Output')
+            .select('created_at, Calories, "Type of Meal"')
+            .eq('userid', userId)
+            .gte('created_at', startDate)
+            .order('created_at', { ascending: true });
+        
+        if (error) {
+            console.error('Error fetching daily totals:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to fetch daily totals',
+                details: error.message
+            });
+        }
+        
+        // Aggregate by date
+        const dailyTotals = {};
+        const mealTypeTotals = {};
+        
+        (data || []).forEach(meal => {
+            const date = meal.created_at.split('T')[0]; // Get YYYY-MM-DD
+            
+            // Total for the day
+            if (!dailyTotals[date]) {
+                dailyTotals[date] = 0;
+            }
+            dailyTotals[date] += meal.Calories || 0;
+            
+            // Total by meal type
+            if (!mealTypeTotals[date]) {
+                mealTypeTotals[date] = { breakfast: 0, lunch: 0, dinner: 0 };
+            }
+            const mealType = (meal['Type of Meal'] || '').toLowerCase();
+            if (mealTypeTotals[date][mealType] !== undefined) {
+                mealTypeTotals[date][mealType] += meal.Calories || 0;
+            }
+        });
+        
+        return res.json({
+            success: true,
+            dailyTotals: dailyTotals,
+            mealTypeTotals: mealTypeTotals
+        });
+        
+    } catch (error) {
+        console.error('Error in get-daily-totals endpoint:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to fetch daily totals'
+        });
+    }
+});
+
 // Health check endpoint
 app.get('/health', async (req, res) => {
     try {

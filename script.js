@@ -33,8 +33,13 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Initialize app after authentication check
-    initializeApp();
+    // Load data from database and initialize app
+    loadDataFromDatabase().then(dbData => {
+        if (dbData && dbData.dailyTotals) {
+            cachedDailyTotals = dbData.dailyTotals;
+        }
+        initializeApp();
+    });
 });
 
 // State management
@@ -44,6 +49,192 @@ let dailyCalories = {
     lunch: 0,
     dinner: 0
 };
+let calorieChart = null;
+
+// Get today's date as YYYY-MM-DD
+function getTodayDate() {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+}
+
+// Load data from database
+async function loadDataFromDatabase() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+    
+    try {
+        // Fetch daily totals for last 7 days
+        const response = await fetch('http://localhost:3000/api/get-daily-totals', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Get today's date
+            const today = getTodayDate();
+            
+            // Load today's calories by meal type
+            if (data.mealTypeTotals[today]) {
+                dailyCalories.breakfast = data.mealTypeTotals[today].breakfast || 0;
+                dailyCalories.lunch = data.mealTypeTotals[today].lunch || 0;
+                dailyCalories.dinner = data.mealTypeTotals[today].dinner || 0;
+            }
+            
+            return data;
+        }
+    } catch (error) {
+        console.error('Error loading data from database:', error);
+    }
+    
+    return null;
+}
+
+// Save meal to database
+async function saveMealToDatabase(userId, meal, mealType, calories) {
+    try {
+        const response = await fetch('http://localhost:3000/api/save-meal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId,
+                meal,
+                mealType,
+                calories
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Failed to save meal to database:', data.error);
+        }
+        
+        return data.success;
+    } catch (error) {
+        console.error('Error saving meal to database:', error);
+        return false;
+    }
+}
+
+// Get last 7 days of calorie data from cached database data
+function getLast7DaysData(dailyTotalsFromDB) {
+    const labels = [];
+    const data = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        // Format label (e.g., "Mon 15" or "Today")
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const dayNum = date.getDate();
+        const label = i === 0 ? 'Today' : `${dayName} ${dayNum}`;
+        labels.push(label);
+        
+        // Get calories for this date from database data
+        const total = dailyTotalsFromDB && dailyTotalsFromDB[dateStr] ? dailyTotalsFromDB[dateStr] : 0;
+        data.push(total);
+    }
+    
+    return { labels, data };
+}
+
+// Store database data for charts
+let cachedDailyTotals = {};
+
+// Initialize the chart
+function initializeChart(dailyTotalsFromDB) {
+    const ctx = document.getElementById('calorieChart');
+    if (!ctx) return;
+    
+    const { labels, data } = getLast7DaysData(dailyTotalsFromDB);
+    
+    calorieChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Calories',
+                data: data,
+                backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                borderColor: 'rgba(102, 126, 234, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            return `Calories: ${context.parsed.y.toLocaleString()} kcal`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' kcal';
+                        },
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update the chart
+function updateChart(dailyTotalsFromDB) {
+    if (!calorieChart) return;
+    
+    const { labels, data } = getLast7DaysData(dailyTotalsFromDB || cachedDailyTotals);
+    calorieChart.data.labels = labels;
+    calorieChart.data.datasets[0].data = data;
+    calorieChart.update();
+}
 
 // Initialize the main app functionality
 function initializeApp() {
@@ -75,8 +266,9 @@ function initializeApp() {
         sendBtn.disabled = true;
         mealInput.disabled = true;
 
-        // Add user message to chat
-        addMessage(mealText, 'user');
+        // Add user message to chat with meal type indicator
+        const mealTypeLabel = currentMealType.charAt(0).toUpperCase() + currentMealType.slice(1);
+        addMessage(`[${mealTypeLabel}] ${mealText}`, 'user');
 
         // Clear input
         mealInput.value = '';
@@ -106,8 +298,19 @@ function initializeApp() {
             if (data.success) {
                 addCalorieResponse(mealText, data.calories, data.breakdown);
                 
+                // Save to database
+                const userId = localStorage.getItem('userId');
+                await saveMealToDatabase(userId, mealText, currentMealType, data.calories);
+                
                 // Update stats
                 dailyCalories[currentMealType] += data.calories;
+                
+                // Reload data from database to update everything
+                const dbData = await loadDataFromDatabase();
+                if (dbData && dbData.dailyTotals) {
+                    cachedDailyTotals = dbData.dailyTotals;
+                }
+                
                 updateStats();
             } else {
                 addMessage(`Sorry, I encountered an error: ${data.error}`, 'bot');
@@ -214,7 +417,16 @@ function initializeApp() {
         breakfastCaloriesEl.textContent = dailyCalories.breakfast.toLocaleString();
         lunchCaloriesEl.textContent = dailyCalories.lunch.toLocaleString();
         dinnerCaloriesEl.textContent = dailyCalories.dinner.toLocaleString();
+        
+        // Update chart with latest data
+        updateChart(cachedDailyTotals);
     }
+    
+    // Initialize chart with database data
+    initializeChart(cachedDailyTotals);
+    
+    // Update stats on load (to show saved data)
+    updateStats();
 
     // Event listeners
     sendBtn.addEventListener('click', sendMessage);
